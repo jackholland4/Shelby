@@ -128,23 +128,6 @@ p103
 ```
 
 ```{r}
-# Label majority-minority districts in the 103rd Congress map
-
-label_pts <- st_point_on_surface(south103 %>% filter(maj_minority))
-
-p103_labels <- p103 +
-geom_sf_text(
-data = label_pts,
-aes(label = district_id),
-size     = 2.5,
-fontface = "bold",
-color    = "black"
-)
-
-p103_labels
-```
-
-```{r}
 maj_min <- read.csv("/Users/jackholland/Downloads/majority_minority_districts_by_decade.csv") |>
 mutate(Minority_Districts_Pct_of_Congress = (Majority_Minority_Districts / 435) * 100)
 
@@ -267,201 +250,6 @@ maj_min_gingles_chart
 ```
 
 ```{r}
-# Update the path to your TL shapefile as needed
-
-il_cong <- st_read("/Users/jackholland/Downloads/tl_2022_17_cd118/tl_2022_17_cd118.shp")
-```
-
-```{r}
-il <- il_cong %>%
-mutate(
-DISTRICT_NUM = suppressWarnings(as.integer(as.character(CD118FP))),
-maj_minority = DISTRICT_NUM %in% c(1, 2, 3, 4, 7),
-district_lab = paste0("IL-", DISTRICT_NUM)
-)
-
-ggplot(il) +
-geom_sf(aes(fill = maj_minority), color = "white", linewidth = 0.25) +
-scale_fill_manual(
-values = c(`TRUE` = "#e45756", `FALSE` = "grey85"),
-labels = c(`TRUE` = "Majority-minority", `FALSE` = "Other"),
-name   = NULL
-) +
-coord_sf(datum = NA) +
-labs(
-title = "Illinois Congressional Districts (118th) — Majority-Minority Highlighted"
-) +
-theme_minimal(base_size = 12) +
-theme(
-plot.title      = element_text(hjust = 0.5, face = "bold"),
-legend.position = "bottom"
-)
-
-# If you want labels on majority-minority districts:
-
-# library(ggrepel)
-
-# lab_pts <- st_point_on_surface(il %>% filter(maj_minority))
-
-# last_plot() +
-
-# geom_sf_text(data = lab_pts, aes(label = district_lab), size = 3, fontface = "bold")
-```
-
-```{r}
-library(sf)
-library(dplyr)
-library(readr)
-library(stringr)
-library(tidyr)
-library(ggplot2)
-library(scales)
-
-il_precincts <- st_read('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/il_shapefile/tl_2020_17_vtd20.shp')
-
-biden_precincts <- read_csv(
-  "biden_precincts.csv"
-)
-
-biden_agg <- biden_precincts %>%
-  filter(ContestName == "PRESIDENT AND VICE PRESIDENT") %>%
-  mutate(
-    prec_key = PrecinctName %>%
-      str_to_upper() %>%
-      str_squish(),
-    cand_std = case_when(
-      str_detect(CandidateName, "BIDEN") ~ "BIDEN",
-      str_detect(CandidateName, "TRUMP") ~ "TRUMP",
-      TRUE                               ~ "OTHER"
-    )
-  ) %>%
-  group_by(prec_key, cand_std) %>%
-  summarise(votes = sum(VoteCount, na.rm = TRUE), .groups = "drop") %>%
-  pivot_wider(
-    names_from  = cand_std,
-    values_from = votes,
-    values_fill = 0
-  ) %>%
-  mutate(
-    total_votes_all   = BIDEN + TRUMP + OTHER,
-    total_two_party   = BIDEN + TRUMP,
-    biden_share       = if_else(total_two_party > 0, BIDEN / total_two_party, NA_real_)
-  )
-
-il_precincts_clean <- il_precincts %>%
-  mutate(
-    prec_key = NAME20 %>%
-      str_to_upper() %>%
-      str_squish()
-  )
-
-il_precincts_joined <- il_precincts_clean %>%
-  left_join(biden_agg, by = "prec_key")
-
-il_precincts_joined %>%
-  summarise(
-    n_geoms          = n(),
-    n_with_data      = sum(!is.na(biden_share)),
-    n_missing_data   = sum(is.na(biden_share))
-  )
-```
-
-```{r}
-library(dplyr)
-library(stringr)
-
-il_precincts_colored <- il_precincts_joined %>%
-  mutate(
-    biden_pct = biden_share * 100,
-    trump_pct = 100 - biden_pct,
-    winner    = case_when(
-      is.na(biden_pct)           ~ NA_character_,
-      biden_pct > 50             ~ "Democrat",
-      biden_pct < 50             ~ "Republican",
-      TRUE                       ~ "Tie"
-    ),
-    pct_for_bins = case_when(
-      winner == "Democrat"   ~ biden_pct,
-      winner == "Republican" ~ trump_pct,
-      TRUE                   ~ NA_real_
-    ),
-    # bin into 20–30, 30–40, ... 90–100
-    bin = case_when(
-      pct_for_bins >= 20 & pct_for_bins < 30 ~ "20–30%",
-      pct_for_bins >= 30 & pct_for_bins < 40 ~ "30–40%",
-      pct_for_bins >= 40 & pct_for_bins < 50 ~ "40–50%",
-      pct_for_bins >= 50 & pct_for_bins < 60 ~ "50–60%",
-      pct_for_bins >= 60 & pct_for_bins < 70 ~ "60–70%",
-      pct_for_bins >= 70 & pct_for_bins < 80 ~ "70–80%",
-      pct_for_bins >= 80 & pct_for_bins < 90 ~ "80–90%",
-      pct_for_bins >= 90 & pct_for_bins <= 100 ~ "90–100%",
-      TRUE ~ NA_character_
-    ),
-    fill_cat = case_when(
-      is.na(winner) | is.na(bin) ~ NA_character_,
-      TRUE                       ~ paste(winner, bin)
-    )
-  )
-```
-
-```{r}
-dem_palette <- c(
-  "Democrat 20–30%" = "#E1EFFF",
-  "Democrat 30–40%" = "#D3E7FF",
-  "Democrat 40–50%" = "#B9D7FF",
-  "Democrat 50–60%" = "#86B6F2",
-  "Democrat 60–70%" = "#4389E3",
-  "Democrat 70–80%" = "#1666CB",
-  "Democrat 80–90%" = "#0645B4",
-  "Democrat 90–100%" = "#002B84"
-)
-
-rep_palette <- c(
-  "Republican 20–30%" = "#FFDFE1",
-  "Republican 30–40%" = "#FFCCD0",
-  "Republican 40–50%" = "#F2B3BE",
-  "Republican 50–60%" = "#E27F90",
-  "Republican 60–70%" = "#CC2F4A",
-  "Republican 70–80%" = "#D40000",
-  "Republican 80–90%" = "#AA0000",
-  "Republican 90–100%" = "#800000"
-)
-
-party_palette <- c(dem_palette, rep_palette)
-```
-
-```{r}
-library(ggplot2)
-library(scales)
-
-ggplot(il_precincts_colored) +
-  geom_sf(aes(fill = fill_cat), color = NA) +
-  scale_fill_manual(
-    values   = party_palette,
-    na.value = "grey90",
-    name     = "Two-party winner\nand vote share"
-  ) +
-  coord_sf(datum = NA) +
-  labs(
-    title    = "2020 Presidential Election in Illinois by Precinct",
-    subtitle = "Biden vs. Trump, binned by two-party vote share",
-    caption  = "Source: 2020 precinct-level election returns"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title      = element_text(hjust = 0.5, face = "bold"),
-    legend.position = "right",
-    axis.text       = element_blank(),
-    axis.title      = element_blank(),
-    panel.grid      = element_blank()
-  )
-```
-
-```{r}
-library(sf)
-library(ggplot2)
-library(paletteer)
-
 nc_1992_senate_shp <- st_read('~/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Senate 1992/1992_Senate_Base_Plan_6.shp')
 
 ggplot(nc_1992_senate_shp) +
@@ -470,5 +258,26 @@ ggplot(nc_1992_senate_shp) +
   labs(
     title = "North Carolina State Senate Districts, 1992"
   )
+```
+```{r}
+nc_1992_house_shp <- st_read('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Leg 1992/1992_House_Base_Plan_5.shp')
+
+ggplot(nc_1992_house_shp) +
+  geom_sf() +
+  theme_void() +
+  labs(
+    title = "North Carolina State House Districts, 1992"
+  )
+```
+```{r}
+nc_1992_cong_shp <- st_read('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC Congress 1992/92_cong.shp')
+
+ggplot(nc_1992_cong_shp) +
+  geom_sf() +
+  theme_void() +
+  labs(
+    title = "North Carolina Congressional Districts, 1992"
+  )
+```
 ```
 
