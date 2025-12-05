@@ -12,16 +12,48 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(sf)
-library(dplyr)
-library(ggplot2)
-library(stringr)
 library(tidyverse)
+library(sf)
 library(estimatr)
 library(haven)
 library(stargazer)
 
 select <- dplyr::select
+
+# Custom theme for consistent plot styling
+theme_thesis <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      plot.title      = element_text(hjust = 0.5, face = "bold"),
+      legend.position = "bottom",
+      axis.text       = element_blank(),
+      axis.title      = element_blank(),
+      panel.grid      = element_blank()
+    )
+}
+
+# Reusable color scale for majority-minority charts
+scale_maj_min_colors <- function() {
+  scale_color_manual(
+    values = c(
+      "Percent_Nonwhite_US"                = "#2E86AB",
+      "Minority_Districts_Pct_of_Congress" = "#E45756"
+    ),
+    labels = c(
+      "Percent_Nonwhite_US"                = "U.S. % Nonwhite Population",
+      "Minority_Districts_Pct_of_Congress" = "Minority Districts % of Congress"
+    )
+  )
+}
+
+# Helper function to read and plot NC shapefiles
+plot_nc_shapefile <- function(path, title) {
+  shp <- st_read(path, quiet = TRUE)
+  ggplot(shp) +
+    geom_sf() +
+    theme_void() +
+    labs(title = title)
+}
 ```
 
 ```{r}
@@ -83,45 +115,30 @@ south103 <- south103 %>% mutate(maj_minority = district_id %in% mm_103_south)
 
 ```{r}
 # 97th Congress map (no majority-minority districts)
-
 p97 <- ggplot(south97) +
-geom_sf(fill = "grey85", color = "white", linewidth = 0.15) +
-labs(
-title   = "97th Congress — South (1981–1983)",
-caption = "Source: US Census Bureau, Data: Jeffrey B. Lewis"
-) +
-coord_sf(datum = NA) +
-theme_minimal(base_size = 11) +
-theme(
-plot.title = element_text(hjust = 0.5, face = "bold"),
-axis.text  = element_blank(),
-axis.title = element_blank(),
-panel.grid = element_blank()
-)
+  geom_sf(fill = "grey85", color = "white", linewidth = 0.15) +
+  labs(
+    title   = "97th Congress — South (1981–1983)",
+    caption = "Source: US Census Bureau, Data: Jeffrey B. Lewis"
+  ) +
+  coord_sf(datum = NA) +
+  theme_thesis(base_size = 11)
 
 # 103rd Congress map with majority-minority highlighted
-
 p103 <- ggplot(south103) +
-geom_sf(aes(fill = maj_minority), color = "white", linewidth = 0.15) +
-scale_fill_manual(
-values = c(`TRUE` = "#e45756", `FALSE` = "grey85"),
-labels = c(`TRUE` = "Majority-minority", `FALSE` = "Majority-White"),
-breaks = c(TRUE, FALSE),
-name   = NULL
-) +
-labs(
-title   = "103rd Congress — South (1993–1994)",
-caption = "Source: US Census Bureau, Data: Jeffrey B. Lewis"
-) +
-coord_sf(datum = NA) +
-theme_minimal(base_size = 11) +
-theme(
-plot.title      = element_text(hjust = 0.5, face = "bold"),
-legend.position = "bottom",
-axis.text       = element_blank(),
-axis.title      = element_blank(),
-panel.grid      = element_blank()
-)
+  geom_sf(aes(fill = maj_minority), color = "white", linewidth = 0.15) +
+  scale_fill_manual(
+    values = c(`TRUE` = "#e45756", `FALSE` = "grey85"),
+    labels = c(`TRUE` = "Majority-minority", `FALSE` = "Majority-White"),
+    breaks = c(TRUE, FALSE),
+    name   = NULL
+  ) +
+  labs(
+    title   = "103rd Congress — South (1993–1994)",
+    caption = "Source: US Census Bureau, Data: Jeffrey B. Lewis"
+  ) +
+  coord_sf(datum = NA) +
+  theme_thesis(base_size = 11)
 
 p97
 p103
@@ -139,30 +156,21 @@ values_to = "Percent"
 )
 
 maj_min_chart <- ggplot(maj_min_long, aes(x = Census_Year, y = Percent, color = Measure)) +
-geom_line(size = 1.1) +
-geom_point(size = 2) +
-scale_color_manual(
-values = c(
-"Percent_Nonwhite_US"                = "#2E86AB",
-"Minority_Districts_Pct_of_Congress" = "#E45756"
-),
-labels = c(
-"Percent_Nonwhite_US"                = "U.S. % Nonwhite Population",
-"Minority_Districts_Pct_of_Congress" = "Minority Districts % of Congress"
-)
-) +
-labs(
-title   = "U.S. Nonwhite Population vs. Majority-Minority Congressional Districts (1960–2020)",
-x       = "Census Year",
-y       = "Percent",
-color   = "",
-caption = "Source: US Census Bureau"
-) +
-theme_minimal(base_size = 12) +
-theme(
-plot.title      = element_text(hjust = 0.5, face = "bold"),
-legend.position = "bottom"
-)
+  geom_line(size = 1.1) +
+  geom_point(size = 2) +
+  scale_maj_min_colors() +
+  labs(
+    title   = "U.S. Nonwhite Population vs. Majority-Minority Congressional Districts (1960–2020)",
+    x       = "Census Year",
+    y       = "Percent",
+    color   = "",
+    caption = "Source: US Census Bureau"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title      = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "bottom"
+  )
 
 maj_min_chart
 ```
@@ -200,84 +208,76 @@ ggplot(maj_min_deriv, aes(x = Census_Year, y = slope_per_decade, color = Measure
 
 
 ```{r}
-maj_min_filtered <- maj_min |>
-filter(Census_Year >= 1980 & Census_Year <= 2000) |>
-pivot_longer(
-cols      = c(Percent_Nonwhite_US, Minority_Districts_Pct_of_Congress),
-names_to  = "Measure",
-values_to = "Percent"
-)
+maj_min_filtered <- maj_min_long |>
+  filter(Census_Year >= 1980 & Census_Year <= 2000)
 
 maj_min_gingles_chart <- ggplot(maj_min_filtered, aes(x = Census_Year, y = Percent, color = Measure)) +
-geom_point(size = 3) +
-geom_smooth(method = "loess", se = FALSE, linetype = "solid", linewidth = 1) +
-geom_vline(xintercept = 1986, color = "grey", linetype = "dashed", linewidth = 0.8) +
-annotate(
-"text",
-x      = 1986,
-y      = max(maj_min_filtered$Percent) + 1.5,
-label  = "1986\nThornburg v. Gingles",
-angle  = 90,
-vjust  = -0.5,
-hjust  = 0,
-size   = 3.3,
-color  = "black"
-) +
-scale_color_manual(
-values = c(
-"Percent_Nonwhite_US"                = "#2E86AB",
-"Minority_Districts_Pct_of_Congress" = "#E45756"
-),
-labels = c(
-"Percent_Nonwhite_US"                = "U.S. % Nonwhite Population",
-"Minority_Districts_Pct_of_Congress" = "Minority Districts % of Congress"
-)
-) +
-labs(
-title = "Impact of Thornburg v. Gingles (1986) on Majority-Minority Representation",
-x     = "Census Year",
-y     = "Percent",
-color = ""
-) +
-scale_x_continuous(breaks = seq(1980, 2000, by = 5)) +
-theme_minimal(base_size = 12) +
-theme(
-plot.title      = element_text(hjust = 0.5, face = "bold"),
-legend.position = "bottom"
-)
+  geom_point(size = 3) +
+  geom_smooth(method = "loess", se = FALSE, linetype = "solid", linewidth = 1) +
+  geom_vline(xintercept = 1986, color = "grey", linetype = "dashed", linewidth = 0.8) +
+  annotate(
+    "text",
+    x      = 1986,
+    y      = max(maj_min_filtered$Percent) + 1.5,
+    label  = "1986\nThornburg v. Gingles",
+    angle  = 90,
+    vjust  = -0.5,
+    hjust  = 0,
+    size   = 3.3,
+    color  = "black"
+  ) +
+  scale_maj_min_colors() +
+  labs(
+    title = "Impact of Thornburg v. Gingles (1986) on Majority-Minority Representation",
+    x     = "Census Year",
+    y     = "Percent",
+    color = ""
+  ) +
+  scale_x_continuous(breaks = seq(1980, 2000, by = 5)) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title      = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "bottom"
+  )
 
 maj_min_gingles_chart
 ```
 
 ```{r}
-nc_1992_senate_shp <- st_read('~/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Senate 1992/1992_Senate_Base_Plan_6.shp')
+plot_nc_shapefile(
+  '~/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Senate 1992/1992_Senate_Base_Plan_6.shp',
+  "North Carolina State Senate Districts, 1992"
+)
 
-ggplot(nc_1992_senate_shp) +
-  geom_sf() +
-  theme_void() +
-  labs(
-    title = "North Carolina State Senate Districts, 1992"
-  )
+plot_nc_shapefile(
+  '/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Leg 1992/1992_House_Base_Plan_5.shp',
+  "North Carolina State House Districts, 1992"
+)
+
+plot_nc_shapefile(
+  '/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC Congress 1992/92_cong.shp',
+  "North Carolina Congressional Districts, 1992"
+)
 ```
+\newpage
 ```{r}
-nc_1992_house_shp <- st_read('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC State Leg 1992/1992_House_Base_Plan_5.shp')
+infring_table <- read.csv('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/infring_table.csv')
 
-ggplot(nc_1992_house_shp) +
-  geom_sf() +
-  theme_void() +
-  labs(
-    title = "North Carolina State House Districts, 1992"
-  )
-```
-```{r}
-nc_1992_cong_shp <- st_read('/Users/jackholland/Downloads/School/Thesis/Section 5 Preclearance/Shelby/NC Congress 1992/92_cong.shp')
+colnames(infring_table) <- c("State",
+                             "Poll Tax",
+                             "Grandfather Clause",
+                             "Old Soldier Clause",
+                             "Literacy Test")
 
-ggplot(nc_1992_cong_shp) +
-  geom_sf() +
-  theme_void() +
-  labs(
-    title = "North Carolina Congressional Districts, 1992"
-  )
+# Table with TITLE as the caption
+knitr::kable(
+  infring_table,
+  caption = "Voting Deterrence Mechanisms in Former Confederate States, 1890–1918"
+)
+
+# Caption / source printed underneath the table
+cat("\n\nSource: Jerrold G. Rusk, *A Statistical History of the American Electorate* ",
+    "(Washington DC: CQ Press, 2001), pp. 33–35.\n")
 ```
-```
+
 
