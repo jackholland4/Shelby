@@ -1,0 +1,65 @@
+type,state,county,township,applicable_date,federal_register_citation,fr_publication_date,FIPS
+State,Alabama,,,11/1/1964,30 FR 9897,8/7/1965,01
+State,Alaska,,,11/1/1972,40 FR 49422,10/22/1975,02
+State,Arizona,,,11/1/1972,40 FR 43746,9/23/1975,04
+State,Georgia,,,11/1/1964,30 FR 9897,8/7/1965,13
+State,Louisiana,,,11/1/1964,30 FR 9897,8/7/1965,22
+State,Mississippi,,,11/1/1964,30 FR 9897,8/7/1965,28
+State,South Carolina,,,11/1/1964,30 FR 9897,8/7/1965,45
+State,Texas,,,11/1/1972,40 FR 43746,9/23/1975,48
+State,Virginia,,,11/1/1964,30 FR 9897,8/7/1965,51
+County,California,Kings,,11/1/1972,40 FR 43746,9/23/1975,06031
+County,California,Monterey,,11/1/1968,36 FR 5809,3/27/1971,06053
+County,California,Yuba,,11/1/1968,36 FR 5809,3/27/1971,06115
+County,Florida,Collier,,11/1/1972,41 FR 34329,8/13/1976,12021
+County,Florida,Hardee,,11/1/1972,40 FR 43746,9/23/1975,12049
+County,Florida,Hendry,,11/1/1972,41 FR 34329,8/13/1976,12051
+County,Florida,Hillsborough,,11/1/1972,40 FR 43746,9/23/1975,12057
+County,Florida,Monroe,,11/1/1972,40 FR 43746,9/23/1975,12087
+County,New York,Bronx,,11/1/1968,36 FR 5809,3/27/1971,36005
+County,New York,Kings,,11/1/1968,36 FR 5809,3/27/1971,36047
+County,New York,New York,,11/1/1968,36 FR 5809,3/27/1971,36061
+County,North Carolina,Anson,,11/1/1964,30 FR 9897,8/7/1965,37007
+County,North Carolina,Beaufort,,11/1/1964,31 FR 5081,3/29/1966,37013
+County,North Carolina,Bertie,,11/1/1964,30 FR 9897,8/7/1965,37015
+County,North Carolina,Bladen,,11/1/1964,31 FR 5081,3/29/1966,37017
+County,North Carolina,Camden,,11/1/1964,31 FR 3317,3/2/1966,37029
+County,North Carolina,Caswell,,11/1/1964,30 FR 9897,8/7/1965,37033
+County,North Carolina,Chowan,,11/1/1964,30 FR 9897,8/7/1965,37041
+County,North Carolina,Cleveland,,11/1/1964,31 FR 5081,3/29/1966,37045
+County,North Carolina,Craven,,11/1/1964,30 FR 9897,8/7/1965,37049
+County,North Carolina,Cumberland,,11/1/1964,30 FR 9897,8/7/1965,37051
+County,North Carolina,Edgecombe,,11/1/1964,30 FR 9897,8/7/1965,37065
+County,North Carolina,Franklin,,11/1/1964,30 FR 9897,8/7/1965,37069
+County,North Carolina,Gaston,,11/1/1964,31 FR 5081,3/29/1966,37071
+County,North Carolina,Gates,,11/1/1964,30 FR 9897,8/7/1965,37073
+County,North Carolina,Granville,,11/1/1964,30 FR 9897,8/7/1965,37077
+County,North Carolina,Greene,,11/1/1964,30 FR 9897,8/7/1965,37079
+County,North Carolina,Guilford,,11/1/1964,31 FR 5081,3/29/1966,37081
+County,North Carolina,Halifax,,11/1/1964,30 FR 9897,8/7/1965,37083
+County,North Carolina,Harnett,,11/1/1964,31 FR 5081,3/29/1966,37085
+County,North Carolina,Hertford,,11/1/1964,30 FR 9897,8/7/1965,37091
+County,North Carolina,Hoke,,11/1/1964,30 FR 9897,8/7/1965,37093
+County,North Carolina,Jackson,,11/1/1972,40 FR 49422,10/22/1975,37099
+County,North Carolina,Lee,,11/1/1964,31 FR 5081,3/29/1966,37105
+County,North Carolina,Lenoir,,11/1/1964,30 FR 9897,8/7/1965,37107
+County,North Carolina,Martin,,11/1/1964,31 FR 19,1/4/1966,37117
+County,North Carolina,Nash,,11/1/1964,30 FR 9897,8/7/1965,37127
+County,North Carolina,Northampton,,11/1/1964,30 FR 9897,8/7/1965,37131
+County,North Carolina,Onslow,,11/1/1964,30 FR 9897,8/7/1965,37133
+County,North Carolina,Pasquotank,,11/1/1964,30 FR 9897,8/7/1965,37139
+County,North Carolina,Perquimans,,11/1/1964,31 FR 3317,3/2/1966,37143
+County,North Carolina,Person,,11/1/1964,30 FR 9897,8/7/1965,37145
+County,North Carolina,Pitt,,11/1/1964,30 FR 9897,8/7/1965,37147
+County,North Carolina,Robeson,,11/1/1964,30 FR 9897,8/7/1965,37155
+County,North Carolina,Rockingham County,,11/1/1964,31 FR 5081,3/29/1966,37157
+County,North Carolina,Scotland,,11/1/1964,30 FR 9897,8/7/1965,37165
+County,North Carolina,Union,,11/1/1964,31 FR 5081,3/29/1966,37179
+County,North Carolina,Vance,,11/1/1964,30 FR 9897,8/7/1965,37181
+County,North Carolina,Washington,,11/1/1964,31 FR 19,1/4/1966,37191
+County,North Carolina,Wayne,,11/1/1964,30 FR 9897,8/7/1965,37191
+County,North Carolina,Wilson,,11/1/1964,30 FR 9897,8/7/1965,37195
+County,South Dakota,Shannon,,11/1/1972,41 FR 784,1/5/1976,46113
+County,South Dakota,Todd,,11/1/1972,41 FR 784,1/5/1976,46121
+Township,Michigan,Allegan,Clyde Township,11/1/1972,41 FR 34329,8/13/1976,2616760
+Township,Michigan,Saginaw,Buena Vista Township,11/1/1972,41 FR 34329,8/13/1976,2611560
